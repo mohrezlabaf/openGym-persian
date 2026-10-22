@@ -23,8 +23,13 @@ export function fmtDate(iso, long, withYear = false) {
 export function fmtDateRange(from, to, long, now = new Date()) {
   if (!from) return ''
   const last = to || from
-  const year = String(now.getFullYear())
-  const withYear = from.slice(0, 4) !== last.slice(0, 4) || from.slice(0, 4) !== year
+  const yearFormatter = new Intl.DateTimeFormat(dateLocale(), { year: 'numeric' })
+  const yearOf = d => yearFormatter.formatToParts(d)
+    .filter(p => p.type === 'year' || p.type === 'era')
+    .map(p => p.value).join('/')
+  const firstYear = yearOf(new Date(from + 'T12:00:00'))
+  const withYear = firstYear !== yearOf(new Date(last + 'T12:00:00'))
+    || firstYear !== yearOf(now)
   return from === last ? fmtDate(from, long, withYear) : fmtDate(from, long, withYear) + ' – ' + fmtDate(last, long, withYear)
 }
 // In the UI language: the Latin h, m and min stood inside Arabic and Ukrainian rows.
@@ -112,8 +117,9 @@ export function fmtDaysAgo(iso, dayIso = todayISO()) {
    else. */
 export const MONDAY = 1
 export const SUNDAY = 0
+export const SATURDAY = 6
 /** The profile's first weekday, defaulting to Monday for every state written before this. */
-export const weekStartOf = S => (S?.weekStart === SUNDAY ? SUNDAY : MONDAY)
+export const weekStartOf = S => ([SUNDAY, MONDAY, SATURDAY].includes(S?.weekStart) ? S.weekStart : MONDAY)
 /** getDay() indices in display order — [1..6,0] for a Monday start, [0..6] for a Sunday one. */
 export const weekOrder = (ws = MONDAY) => Array.from({ length: 7 }, (_, i) => (ws + i) % 7)
 /** How many days a weekday sits past the start of its week. 0..6, so it doubles as a column. */
