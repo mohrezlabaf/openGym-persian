@@ -706,5 +706,22 @@ export default {
   "{0} set still unchecked. Finish the workout now?": "هنوز {0} ست انجام‌شده علامت نخورده است. تمرین پایان یابد؟",
   "{0} sets still unchecked. Finish the workout now?": "هنوز {0} ست انجام‌شده علامت نخورده است. تمرین پایان یابد؟",
   "Finish workout?": "تمرین پایان یابد؟",
-  "Finish and save": "پایان و ذخیره"
+  "Finish and save": "پایان و ذخیره",
+  "Workout complete!": "تمرین به پایان رسید!",
+  "Duration": "مدت تمرین",
+  "Volume": "حجم تمرین",
+  "PRs": "رکوردهای شخصی",
+  "New PR:": "رکورد شخصی جدید:",
+  "Best estimated 1RM:": "بهترین تخمین بیشینه یک تکرار:",
+  "What you just trained": "عضلات تمرین‌داده‌شده",
+  "Nice!": "عالی!",
+  "{0} min": "{0} دقیقه",
+  "{0}h {1}m": "{0} ساعت و {1} دقیقه",
+  "{0} set · {1} work": "{0} ست · {1} ست اصلی",
+  "{0} sets · {1} work": "{0} ست · {1} ست اصلی",
+  "Add photo or video": "افزودن عکس یا ویدیو",
+  "Loading…": "در حال بارگذاری…",
+  "Photo or video {0} of {1}": "عکس یا ویدیوی {0} از {1}",
+  "A progress photo or a form-check video, kept with this workout.": "عکس پیشرفت یا ویدیوی بررسی فرم اجرای حرکت را همراه این جلسه نگه دارید.",
+  "Up to {0} photos or videos per workout.": "حداکثر {0} عکس یا ویدیو برای هر جلسه تمرین."
 };
