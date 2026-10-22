@@ -507,5 +507,12 @@ export default {
   "{0} formula: calculated from one set, not a tested max.": "فرمول {0}؛ محاسبه‌شده از یک ست، نه رکوردی که در عمل آزموده شده باشد.",
   "How to": "روش اجرای حرکت",
   "instructions in English": "راهنما به زبان انگلیسی",
-  "Suggest a fix for this exercise": "پیشنهاد اصلاح این حرکت"
+  "Suggest a fix for this exercise": "پیشنهاد اصلاح این حرکت",
+  "As entered": "همان مقدار واردشده",
+  "Each": "هر دمبل",
+  "Both": "مجموع دو دمبل",
+  "The weight of the one you hold. One arm, so it counts once.": "وزن دمبلی که در دست دارید؛ چون حرکت تک‌دست است، فقط یک بار محاسبه می‌شود.",
+  "The weight of one, so 20 means 20 in each hand. Volume counts both.": "وزن یک دمبل؛ مثلاً ۲۰ یعنی در هر دست ۲۰. حجم تمرین با احتساب هر دو دمبل محاسبه می‌شود.",
+  "Both together, so 40 means two 20s.": "مجموع وزن دو دمبل؛ مثلاً ۴۰ یعنی دو دمبل ۲۰.",
+  "Counted as you type it, the way it always was.": "همان عددی که وارد می‌کنید محاسبه می‌شود؛ مطابق روش قبلی."
 };
