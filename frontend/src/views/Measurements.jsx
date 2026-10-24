@@ -1,3 +1,4 @@
+import DateField from '../components/DateField.jsx'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
@@ -78,10 +79,10 @@ function MeasurementLog({ sourceDate, close }) {
   return <>
     <h3>{source ? t('Edit measurements') : t('Log measurements')}</h3>
     <div className="muted small" style={{ marginBottom: 12 }}>{t('Fill only what you measured today. Empty fields stay empty.')}</div>
-    <label className="measure-date">
+    <div className="measure-date">
       <span>{t('Date')}</span>
-      <input className="field" type="date" value={date} max={todayISO()} onChange={e => setDate(e.target.value)} />
-    </label>
+      <DateField className="field" value={date} max={todayISO()} onChange={e => setDate(e.target.value)} />
+    </div>
     {fields.length ? <div className="measure-form">
       {fields.map(field => <label className="measure-field" key={field.key}>
         <span>{t(field.label)}</span>
