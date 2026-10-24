@@ -1,3 +1,4 @@
+import { calendarMonthStart, shiftCalendarMonth, calendarMonth } from './lib/calendar.js'
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
@@ -2688,8 +2689,8 @@ export const workoutDetailSheet = w => ui().openSheet(close => <WorkoutDetail w=
 /* ============================ calendar ============================ */
 function Calendar({ start, close }) {
   const st = useStore(s => s.S)
-  const [cur, setCur] = useState(() => { const d = start ? new Date(start) : new Date(); d.setDate(1); return d })
-  const y = cur.getFullYear(), mo = cur.getMonth()
+  const [cur, setCur] = useState(() => calendarMonthStart(start || new Date()))
+  const month = calendarMonth(cur)
   const byDay = {}
   st.workouts.forEach(w => {
     const day = workoutDay(w)
@@ -2697,15 +2698,15 @@ function Calendar({ start, close }) {
   })
   // Which column the 1st sits in, and therefore how many blanks come before it.
   const ws = weekStartOf(st)
-  const startOffset = weekDayOffset(new Date(y, mo, 1).getDay(), ws)
-  const daysIn = new Date(y, mo + 1, 0).getDate()
-  const monthWs = st.workouts.filter(w => workoutDay(w)?.startsWith(y + '-' + String(mo + 1).padStart(2, '0')))
+  const startOffset = weekDayOffset(month.start.getDay(), ws)
+  const daysIn = month.days.length
+  const monthWs = st.workouts.filter(w => { const day = workoutDay(w); return day >= month.firstISO && day < month.nextISO })
   const monthVol = monthWs.reduce((a, w) => a + (w.vol || 0), 0)
   const monthMs = monthWs.reduce((a, w) => a + Math.max(0, (w.end || w.start) - w.start), 0)
   const cells = []
   for (let i = 0; i < startOffset; i++) cells.push(<div key={'e' + i} />)
   for (let d = 1; d <= daysIn; d++) {
-    const iso = y + '-' + String(mo + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0')
+    const iso = month.days[d - 1]
     // A fulfilled pin (a coach session pinned here and since done) reads as no override, as it does everywhere else.
     const ws = byDay[iso], planned = effectiveRoutineIds(st, iso).length > 0, ovr = st.dayPlan[iso] !== undefined && pinState(st, st.dayPlan[iso]) !== 'done'
     // A day off with a note on it (#261) shows the note's dot instead of the plan's, and its
@@ -2721,9 +2722,9 @@ function Calendar({ start, close }) {
   }
   return <>
     <div className="row between" style={{ marginBottom: 2 }}>
-      <button className="iconbtn" onClick={() => setCur(new Date(y, mo - 1, 1))} aria-label={t('Previous month')}><Icon name="chevronLeft" /></button>
-      <h3 style={{ margin: 0 }}>{t(MONTHS_LONG[mo])} {y}</h3>
-      <button className="iconbtn" onClick={() => setCur(new Date(y, mo + 1, 1))} aria-label={t('Next month')}><Icon name="chevronRight" /></button>
+      <button className="iconbtn" onClick={() => setCur(shiftCalendarMonth(cur, -1))} aria-label={t('Previous month')}><Icon name="chevronLeft" /></button>
+      <h3 style={{ margin: 0 }}>{month.label}</h3>
+      <button className="iconbtn" onClick={() => setCur(shiftCalendarMonth(cur, 1))} aria-label={t('Next month')}><Icon name="chevronRight" /></button>
     </div>
     <div className="small muted" style={{ textAlign: 'center' }}>{monthWs.length ? `${tn('{0} workout', '{0} workouts', monthWs.length)} · ${fmtDur(monthMs)} · ${fmtVol(monthVol, st.unit)}` : t('No workouts this month')}</div>
     <div className="cal-grid">{weekOrder(ws).map(d => <div key={d} className="cal-h">{t(DAYS[d])}</div>)}{cells}</div>
@@ -2731,7 +2732,7 @@ function Calendar({ start, close }) {
       <span><i style={{ background: 'var(--acc)' }} />{t('Trained')}</span>
       <span><i style={{ background: 'var(--label-3)' }} />{t('Planned')}</span>
       <span><i style={{ background: 'var(--orange)' }} />{t('Rescheduled')}</span>
-      {Object.keys(st.dayNotes || {}).some(k => k.startsWith(y + '-' + String(mo + 1).padStart(2, '0')) && dayNoteOf(st, k)) &&
+      {Object.keys(st.dayNotes || {}).some(k => k >= month.firstISO && k < month.nextISO && dayNoteOf(st, k)) &&
         <span><i style={{ background: 'var(--indigo)' }} />{t('Day note')}</span>}
     </div>
     <div className="small dim" style={{ textAlign: 'center', marginTop: 10 }}>{t('Tap a trained day for details · tap any other day to plan a session')}</div>
