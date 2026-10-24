@@ -1,7 +1,8 @@
+import { calendarParts } from '../lib/calendar.js'
 import { useEffect, useRef, useState } from 'react'
-import { fmtVol, isoOf, todayISO, MONTHS, weekStartOf, weekDayOffset } from '../lib/format.js'
+import { fmtVol, fmtDate, isoOf, todayISO, weekStartOf, weekDayOffset } from '../lib/format.js'
 import { workoutDay, workoutDuration, workoutVolume } from '../lib/history.js'
-import { t, tn } from '../lib/i18n.js'
+import { t, tn, dateLocale } from '../lib/i18n.js'
 import { tappable } from '../lib/use-sheet-keyboard.js'
 import { Segmented } from './ui.jsx'
 import { dayNoteOf, dayNoteLine } from '../lib/day-notes.js'
@@ -59,10 +60,11 @@ export default function Heatmap({ S, onDay, metric: selectedMetric, onMetricChan
   let lastMonth = -1
   for (let wk = 0; wk <= 52; wk++) {
     const colStart = new Date(start); colStart.setDate(start.getDate() + wk * 7)
-    const mo = colStart.getMonth()
-    const showM = mo !== lastMonth && colStart.getDate() <= 7 && wk < 51
-    months.push(<span key={wk}>{showM ? t(MONTHS[mo]) : ''}</span>)
-    if (colStart.getDate() <= 7) lastMonth = mo
+    const parts = calendarParts(colStart)
+    const mo = parts.year + '-' + parts.month
+    const showM = mo !== lastMonth && parts.day <= 7 && wk < 51
+    months.push(<span key={wk}>{showM ? colStart.toLocaleDateString(dateLocale(), { month: 'short' }) : ''}</span>)
+    if (parts.day <= 7) lastMonth = mo
     const cells = []
     for (let d = 0; d < 7; d++) {
       const day = new Date(colStart); day.setDate(colStart.getDate() + d)
@@ -73,7 +75,7 @@ export default function Heatmap({ S, onDay, metric: selectedMetric, onMetricChan
       const note = !a && dayNoteOf(S, key)
       const cls = 'hm-c l' + level(a) + (note ? ' noted' : '') + (key === todayISO() ? ' today' : '') + (day > today ? ' future' : '')
       cells.push(<div key={d} className={cls}
-        title={key + (a ? ` · ${tn('{0} workout', '{0} workouts', a.n)} · ${t('{0} min', a.min)} · ${fmtVol(a.vol, S.unit)}` : note ? ` · ${dayNoteLine(note, t)}` : '')}
+        title={fmtDate(key, true, true) + (a ? ` · ${tn('{0} workout', '{0} workouts', a.n)} · ${t('{0} min', a.min)} · ${fmtVol(a.vol, S.unit)}` : note ? ` · ${dayNoteLine(note, t)}` : '')}
         {...tappable(a || note ? () => onDay?.(key) : undefined)} />)
     }
     cols.push(<div key={wk} className="hm-col">{cells}</div>)

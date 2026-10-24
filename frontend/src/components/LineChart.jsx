@@ -1,6 +1,7 @@
+import { calendarParts, shiftCalendarMonth } from '../lib/calendar.js'
 import { useLayoutEffect, useRef, useState } from 'react'
-import { fmtNum, fmtDate, MONTHS, isoOf } from '../lib/format.js'
-import { t } from '../lib/i18n.js'
+import { fmtNum, fmtDate, isoOf } from '../lib/format.js'
+import { t, dateLocale } from '../lib/i18n.js'
 
 const W = 340   // viewBox width; the svg stretches to its container, height comes from `h`
 
@@ -82,12 +83,17 @@ export default function LineChart({ points, h = 150, unit = '', color = 'var(--a
     }
     const d0 = new Date(t0), d1 = new Date(t1)
     const ticks = []
-    let m = new Date(d0.getFullYear(), d0.getMonth() + 1, 1)
-    while (m <= d1) { ticks.push({ t: +m, txt: t(MONTHS[m.getMonth()]) }); m = new Date(m.getFullYear(), m.getMonth() + 1, 1) }
+    let m = shiftCalendarMonth(d0, 1)
+    m.setHours(0, 0, 0, 0)
+    while (m <= d1) {
+      ticks.push({ t: +m, txt: m.toLocaleDateString(dateLocale(), { month: 'short' }) })
+      m = shiftCalendarMonth(m, 1)
+      m.setHours(0, 0, 0, 0)
+    }
     if (ticks.length === 0 && !single) {
       for (let i = 0; i <= 2; i++) {
         const tv = t0 + (t1 - t0) * i / 2, dd = new Date(tv)
-        ticks.push({ t: tv, txt: dd.getDate() + ' ' + t(MONTHS[dd.getMonth()]), anchor: i === 0 ? 'start' : i === 2 ? 'end' : 'middle' })
+        ticks.push({ t: tv, txt: fmtDate(isoOf(dd)), anchor: i === 0 ? 'start' : i === 2 ? 'end' : 'middle' })
       }
     }
     const every = Math.max(1, Math.ceil(ticks.length / 7))
@@ -106,7 +112,7 @@ export default function LineChart({ points, h = 150, unit = '', color = 'var(--a
   const gid = 'g' + Math.round(t0 % 1e7) + '_' + H
   const hoverSource = single ? [points[0]] : points
   const hoverDates = hoverSource.map(p => p.d || isoOf(new Date(p.t)))
-  const showYear = new Set(hoverDates.map(iso => new Date(iso + 'T12:00:00').getFullYear())).size > 1
+  const showYear = new Set(hoverDates.map(iso => calendarParts(new Date(iso + 'T12:00:00')).year)).size > 1
   const hoverPts = hoverSource.map((p, i) => ({ x: X(p.t), y: Y(p.y), t: p.t, iso: hoverDates[i], v: p.y, note: p.note }))
   const marked = points.some(p => p.m != null)
 
