@@ -1,3 +1,4 @@
+import { calendarMonth } from '../lib/calendar.js'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
@@ -33,7 +34,7 @@ const SET_COLORS = ['var(--blue)', 'var(--green)', 'var(--orange)', 'var(--purpl
 
 // The date range buttons under Body weight, and since issue #511 under Exercise progress too.
 // In days, 0 = everything; a function because the labels follow the current language.
-const rangeOptions = () => [{ value: 30, label: '1M' }, { value: 90, label: '3M' }, { value: 365, label: '1Y' }, { value: 0, label: t('All') }]
+const rangeOptions = () => [{ value: 30, label: t('30 days') }, { value: 90, label: t('90 days') }, { value: 365, label: t('365 days') }, { value: 0, label: t('All') }]
 // Where a range starts, in ms. Worked out once per pick rather than from each render's clock, so
 // the memoised chart arrays below keep their identity (LineChart drops its hover on a new one).
 const rangeStart = days => (days ? Date.now() - days * 86400000 : 0)
@@ -230,7 +231,7 @@ function MuscleBalance({ S }) {
           onClick={() => { setHard(h => !h); setSel(null) }}>{on ? t('Hard') : t('All')}</Button>}
       </div>
       <Segmented className="seg-range" value={win} onChange={v => { setWin(v); setSel(null); setWeeklyExpanded(false) }}
-        options={[{ value: 7, label: t('Week') }, { value: 30, label: '30d' }, { value: 90, label: '90d' }, { value: 0, label: t('All') }]} />
+        options={[{ value: 7, label: t('Week') }, { value: 30, label: t('30 days') }, { value: 90, label: t('90 days') }, { value: 0, label: t('All') }]} />
       {weekly ? <div data-weekly-volume-comparison data-week={selectedWeek}>
         <div className="row between" style={{ margin: '10px 0 6px' }}>
           <button className="iconbtn sm" aria-label={t('Previous week')} onClick={() => { setWeekOffset(offset => offset - 1); setSel(null); setWeeklyExpanded(false) }}><Icon name="chevronLeft" /></button>
@@ -342,7 +343,7 @@ function EffortCard({ S }) {
   return <div className="card">
     <h2>{t('Effort')} <span className="dim" style={{ textTransform: 'none', letterSpacing: 0 }}>· {t('how close to failure')}{estimated ? ' · ' + t('estimated') : ''}</span></h2>
     <Segmented className="seg-range" value={win} onChange={setWin}
-      options={[{ value: 30, label: '30d' }, { value: 90, label: '90d' }, { value: 365, label: '1Y' }, { value: 0, label: t('All') }]} />
+      options={[{ value: 30, label: t('30 days') }, { value: 90, label: t('90 days') }, { value: 365, label: t('365 days') }, { value: 0, label: t('All') }]} />
     {sum.rated === 0 && sum.est === 0 ? <div className="muted small">{t('No rated sets in this period.')}</div> : <>
       <div className="row between" style={{ alignItems: 'flex-end', gap: 12 }}>
         <div>
@@ -432,7 +433,11 @@ export default function Stats() {
   const bw30 = S.bodyweight.filter(b => (b.t || new Date(b.d).getTime()) > now - 30 * 86400000)
   const bwDelta30 = bw30.length > 1 ? bw30[bw30.length - 1].w - bw30[0].w : null
   const workouts = S.workouts
-  const monthW = workouts.filter(w => workoutDay(w)?.slice(0, 7) === todayISO().slice(0, 7)).length
+  const currentMonth = calendarMonth(todayISO())
+  const monthW = workouts.filter(w => {
+    const day = workoutDay(w)
+    return day >= currentMonth.firstISO && day < currentMonth.nextISO
+  }).length
 
   // Dumbbell weights are read in each exercise's current meaning (lib/dumbbells.js), so the
   // chart and its best compare like with like across a switch between per bell and total.
